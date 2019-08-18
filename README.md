@@ -7,7 +7,7 @@ layout algorithms for visualizing hierarchical data.
 ### example
 
 ```js
-const Hierarchy = require('@antv/hierarchy');
+const Hierarchy = require('@datapi/hierarchy');
 
 // your tree data
 const root = {

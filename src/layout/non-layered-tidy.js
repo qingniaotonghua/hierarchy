@@ -1,35 +1,36 @@
 // wrap tree node
-function WrappedTree(w, h, y, c = []) {
+function WrappedTree(w, h, y, c = [], data) {
   const me = this;
-    // size
+  // size
   me.w = w || 0;
   me.h = h || 0;
 
-    // position
+  // position
   me.y = y || 0;
   me.x = 0;
 
-    // children
+  // children
   me.c = c || [];
   me.cs = c.length;
 
-    // modified
+  // modified
   me.prelim = 0;
   me.mod = 0;
   me.shift = 0;
   me.change = 0;
 
-    // left/right tree
+  // left/right tree
   me.tl = null;
   me.tr = null;
 
-    // extreme left/right tree
+  // extreme left/right tree
   me.el = null;
   me.er = null;
 
-    // modified left/right tree
+  // modified left/right tree
   me.msel = 0;
   me.mser = 0;
+  me.data = data;
 }
 
 WrappedTree.fromNode = (root, isHorizontal) => {
@@ -38,8 +39,8 @@ WrappedTree.fromNode = (root, isHorizontal) => {
   root.children.forEach(child => {
     children.push(WrappedTree.fromNode(child, isHorizontal));
   });
-  if (isHorizontal) return new WrappedTree(root.height, root.width, root.x, children);
-  return new WrappedTree(root.width, root.height, root.y, children);
+  if (isHorizontal) return new WrappedTree(root.height, root.width, root.x, children, root.data);
+  return new WrappedTree(root.width, root.height, root.y, children, root.data);
 };
 
 // node utils
@@ -93,6 +94,7 @@ function layer(node, isHorizontal, d = 0) {
 
 module.exports = (root, options = {}) => {
   const isHorizontal = options.isHorizontal;
+  const { isAlignedWithFirstChild } = options;
   function firstWalk(t) {
     if (t.cs === 0) {
       setExtremes(t);
@@ -193,10 +195,14 @@ module.exports = (root, options = {}) => {
   }
 
   function positionRoot(t) {
-    t.prelim = (
-      t.c[0].prelim + t.c[0].mod + t.c[t.cs - 1].mod +
-      t.c[t.cs - 1].prelim + t.c[t.cs - 1].w
-    ) / 2 - t.w / 2;
+    if (isAlignedWithFirstChild && isAlignedWithFirstChild(t.data)) {
+      t.prelim = t.c[0].prelim + t.c[0].mod + t.c[0].w / 2 - t.w / 2;
+    } else {
+      t.prelim = (
+        t.c[0].prelim + t.c[0].mod + t.c[t.cs - 1].mod +
+        t.c[t.cs - 1].prelim + t.c[t.cs - 1].w
+      ) / 2 - t.w / 2;
+    }
   }
 
   function secondWalk(t, modsum) {
